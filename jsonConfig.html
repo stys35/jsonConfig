@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>JSON配置工具V1</title>
+    <style type="text/css">
+        .left {
+            float: left;
+            width: 50%;
+        }
+
+        .right {
+            position: relative;
+            z-index: 999;
+            float: right;
+            width: 50%;
+        }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <h1>JSON配置工具</h1>
+    <p :style="{color:jsonStrVerify?'blue':'red'}" style="color: red" v-text="message"></p>
+
+    <div class="left">
+        <textarea rows="20" cols="70" v-model="tabledataStr"></textarea>
+        <br>
+        <button type="button" @click="onformat">格式化字符串</button>
+    </div>
+
+    <div class="right">
+        <button type="button" @click="onadd">增加属性</button>
+        <template v-if="!isArray">
+            <table border="0">
+                <tr>
+                    <th>键</th>
+                    <th>值</th>
+                </tr>
+                <tr v-for="(item, index) in tabledata">
+                    <td>键:<input type="text" v-model="item.key" @blur="onblur"></td>
+                    <td>值:<input type="text" v-model="item.val" @blur="onblur"></td>
+                </tr>
+            </table>
+        </template>
+
+        <template v-if="isArray">
+            <table v-for="(item, index) in tabledata" border="0">
+                <tr>
+                    <th>配置编号:{{index}}</th>
+                    <th>配置编号:{{index}}</th>
+                </tr>
+                <tr v-for="second in item">
+                    <td>键:<input type="text" v-model="second.key" @blur="onblur"></td>
+                    <td>值:<input type="text" v-model="second.val" @blur="onblur"></td>
+                </tr>
+            </table>
+        </template>
+    </div>
+
+</div>
+<p style="position: absolute;bottom: 0;">Copyright © 2020 STYS35</p>
+
+<script type="text/javascript" src="https://unpkg.com/vue/dist/vue.js"></script>
+<script>
+
+    function zipStr(str) {
+        return replaceSpace(formatStr(str));
+    }
+
+    function formatStr(strInput) {
+        strInput = strInput.replace(/\r/ig, "");
+        strInput = strInput.replace(/\n/ig, "");
+        return strInput;
+    }
+
+    function replaceSpace(strInput) {
+        return strInput.replace(/\s+/g, "");
+    }
+
+    var app = new Vue({
+        el: '#app',
+        data: function () {
+            return {
+                jsonStrVerify: true,
+                message: null,
+                isArray: false,
+                arrItem: {},
+                index: 0,
+                tabledata: [],
+                tabledataStr: null
+            }
+        },
+        props: {},
+        computed: {},
+        methods: {
+            onadd() {
+                var self = this;
+                if (self.isArray) {
+                    self.tabledata.push(self.arrItem);
+                } else {
+                    self.tabledata.push({"key": "", "val": ""});
+                }
+
+            },
+            onblur() {
+                var self = this;
+                if (self.isArray) {
+                    var arrs = [];
+                    self.tabledata.forEach(function (one) {
+                        var obj = {};
+                        one.forEach(function (second) {
+                            obj[second.key] = second.val;
+                        })
+                        arrs.push(obj);
+                    })
+                    self.tabledataStr = JSON.stringify(arrs);
+                } else {
+                    var obj = {};
+                    self.tabledata.forEach(function (item) {
+                        obj[item.key] = item.val;
+                    })
+                    self.tabledataStr = JSON.stringify(obj);
+                }
+            },
+            onformat() {
+                this.tabledataStr = zipStr(this.tabledataStr);
+            }
+        },
+        watch: {
+            tabledataStr(val, oldVal) {
+                var self = this;
+                try {
+                    var arr = [];
+                    var json = JSON.parse(val);
+                    self.isArray = Array.isArray(json);
+                    if (self.isArray) {
+                        json.forEach(function (currentValue, index, array) {
+                            var tarr = [];
+                            for (var key in currentValue) {
+                                tarr.push({"key": key, "val": currentValue[key]});
+                            }
+                            self.arrItem = tarr;
+                            arr.push(tarr);
+                        })
+                    } else {
+                        for (var key in json) {
+                            arr.push({"key": key, "val": json[key]});
+                        }
+                    }
+                    self.tabledata = arr;
+                    self.jsonStrVerify = true;
+                    self.message = "json格式正确!"
+                } catch (e) {
+                    self.jsonStrVerify = false;
+                    self.message = "json格式错误!"
+                }
+            }
+        },
+        mounted: function () {
+            var self = this;
+        },
+        created: function () {
+            var self = this;
+        },
+        destroyed: function () {
+
+        }
+    })
+</script>
+</body>
+</html>
