@@ -1,5 +1,9 @@
 # jsonConfig
-easy jsonConfig;json配置工具
+easy jsonConfig
+简单 json配置工具
+
+# demo
+[demo](https://raw.githack.com/stys35/jsonConfig/master/jsonConfig.html)
 
 # use
 ```js
